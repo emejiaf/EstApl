@@ -1,0 +1,84 @@
+Title
+========================================================
+
+```{r Ajustes, echo=FALSE}
+directorio <- "C:\\Users\\patatas\\Desktop"
+
+
+```
+La información se obtuvo de la página del Banco de México el día 28 de agosto de 2014.
+
+```{r LecturaDatos}
+setwd(directorio)
+TC.Banxico <- read.table("./tipoCambioBanxico.txt", sep = "|", header = TRUE, stringsAsFactors = FALSE)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+```
+
+
+##Transformación de los datos
+
+```{r}
+TC.Banxico$Fecha.DOF <- as.Date(TC.Banxico$Fecha.DOF, format = "%d/%m/%Y")
+temporal <- as.POSIXlt(TC.Banxico$Fecha.DOF)
+#creo nueva columan con el año
+TC.Banxico$año <- unclass(temporal$year)+1900
+```
+
+```{r filtro}
+TC.Banxico.existentes <- subset(TC.Banxico, TC!= "N/E")
+TC.Banxico.existentes$TC <- as.numeric(TC.Banxico.existentes$TC)
+
+```
+
+```{r graficas ,echo=FALSE}
+config.default <- par()
+par(mfrow = c(3,3))
+for(i in 6:14){
+  if(i<=9){
+    hist(subset(TC.Banxico.existentes, TC.Banxico.existentes$año == paste0("200",as.character(i  )))$TC, 
+       main = paste0("200",as.character(i)),
+       xlab = "Tipo de cambio del dólar de E.U.A",
+       ylab = "Frecuencia",
+       breaks = seq(9.9, 15.4, length.out = 30),
+       xlim = c(9.9,15.4),
+       ylim = c(0,120))
+       abline(v = mean(subset(TC.Banxico.existentes, TC.Banxico.existentes$año == 
+       paste0("200",as.character(i  )))$TC), col= "red", lwd= 1)
+       abline(v = median(subset(TC.Banxico.existentes, TC.Banxico.existentes$año == 
+       paste0("200",as.character(i  )))$TC), col= "black", lwd= 1)
+    }else{
+      hist(subset(TC.Banxico.existentes, TC.Banxico.existentes$año == paste0("20",as.character(i         )))$TC, 
+       main = paste0("20",as.character(i)),
+       xlab = "Tipo de cambio del dólar de E.U.A",
+       ylab = "Frecuencia",
+       breaks = seq(9.9, 15.4, length.out = 30),
+       xlim = c(9.9,15.4),
+       ylim = c(0,120)) 
+       abline(v = mean(subset(TC.Banxico.existentes, TC.Banxico.existentes$año == paste0("20",as.character(i  )))$TC), col= "red", lwd= 1)
+      abline(v = median(subset(TC.Banxico.existentes, TC.Banxico.existentes$año == paste0("20",as.character(i  )))$TC), col= "black", lwd= 1)}
+  }
+
+```
+
+Observamos que de 2006 y 2007, el tipo de cambio se mantiene bastante estable alrededor de 11 pesos. En el 2008, la mediana está desplazada a la derecha de la media, lo que nos habla de las primeras observaciones anómalas a la tendencia aanterior. En 2009, esta tendencia al alza continua, también desplazando la madeiana por la derecha de la media. En 2010 comenzamos a observar estabilidad, esta vez entre 12 y 13 pesos. Al año siguiente, vemos más anomalías; con valores entre 11 y 14 pesos. De nuevo, la mediana queda por la derecha de la media. En 2012, 2013 y 2014 de nuevo los valores se estabilizan alrededor de 13 pesos.
+
+
+```{r}
+par(mfrow = c(1,1), las = 1)
+with(TC.Banxico.existentes,
+     boxplot(TC~factor(año)),
+     range = 0,
+     varwidth = TRUE)
+
+```
+ De estos diagramas de caja brazos observamos varias cosas; hay un gran número de *outliers*, en 2008, 2009 y 2012. Esto es consistente con los histogramas, que marcan esos años por la existenciia de dos grupos de observaciones claras. Más que eso, vemos que también en esos años se observa la menor uniformidad en el tipo de cambio con la mediana difiriendo considerablementer con la media.
+ 
+ 
+```{r}
+
+curve(dnorm, -4, 4, xname = "x", col = "red", main = paste0("Gráfica de la función ", mtext((1/sqrt(2*pi))*exp((-x^2)/2))))
+abline(v=0 )
+points(x=0, y=(1/sqrt(2*pi)), col="blue", pch=19)
+text(x=1, y=(1/sqrt(2*pi)), labels="Valor máximo")
+```
+
